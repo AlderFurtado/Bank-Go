@@ -35,3 +35,64 @@ cd study-application
 
 # Build and run with Docker Compose
 docker-compose up --build
+
+```
+
+### 📘 OpenAPI Example
+
+```yaml
+openapi: 3.0.0
+info:
+  title: Bank Go API
+  version: 1.0.0
+  description: API endpoints for the Bank Go collection.
+servers:
+  - url: http://localhost:8080
+paths:
+  /user/balance_no_cache:
+    get:
+      summary: Get Balance (No Cache)
+      description: Returns the balance for a user by CPF, without using cache.
+      parameters:
+        - in: query
+          name: cpf
+          schema:
+            type: string
+          required: true
+          description: CPF of the user whose balance is being requested.
+      responses:
+        '200':
+          description: Successful response with balance information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                  result:
+                    type: string
+                    description: Balance amount
+              example:
+                error: null
+                result: "10000"
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  # The following endpoint is included as a placeholder since details are not provided
+  # Please update with actual details if available
+  /user/balance:
+    get:
+      summary: Get Balance
+      description: Returns the balance for a user (details not provided in context).
+      responses:
+        '200':
+          description: Successful response
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+
