@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Saldo da Conta — {{.AccountName}}</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--text:#e6eef6}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#071025 0%,#031025 100%);color:var(--text);margin:0;padding:28px}
+    .container{max-width:960px;margin:0 auto}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .card{background:var(--card);border-radius:14px;padding:22px;box-shadow:0 8px 30px rgba(2,6,23,.6)}
+    .balance-row{display:flex;justify-content:space-between;align-items:center;gap:16px}
+    .balance-amount{font-size:34px;font-weight:700}
+    .balance-meta{color:var(--muted);font-size:14px}
+    .actions{display:flex;gap:10px}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;color:var(--text);cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#3b82f6);border:none}
+    .list{margin-top:18px}
+    .tx{display:flex;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:8px;background:linear-gradient(180deg,rgba(255,255,255,.02),transparent)}
+    .tx .left{display:flex;gap:10px;align-items:center}
+    .tx .dot{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600}
+    .tx .desc{font-size:14px}
+    .tx .meta{color:var(--muted);font-size:12px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+    @media (max-width:640px){.balance-amount{font-size:26px}.balance-row{flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">B</div>
+        <div>
+          <div style="font-weight:700">{{.AccountName}}</div>
+          <div class="balance-meta">Ag {{.Agency}} • Conta {{.AccountNumber}}</div>
+        </div>
+      </div>
+      <div class="balance-meta">Atualizado em <span id="updatedAt">{{.UpdatedAt}}</span></div>
+    </header>
+
+    <section class="card">
+      <div class="balance-row">
+        <div>
+          <div class="balance-meta">Saldo disponível</div>
+          <div class="balance-amount" id="balance">R$ {{printf "%.2f" .Balance}}</div>
+          <div class="balance-meta">Limite: R$ {{printf "%.2f" .Limit}}</div>
+        </div>
+        <div class="actions">
+          <button class="btn">Transferir</button>
+          <button class="btn">Extrato</button>
+          <button class="btn primary">Adicionar</button>
+        </div>
+      </div>
+
+      <div class="list">
+        <h3 style="margin:12px 0 8px 0">Últimas transações</h3>
+        {{- if .Transactions }}
+          {{- range .Transactions }}
+            <div class="tx">
+              <div class="left">
+                <div class="dot">{{ if lt .Amount 0 }}-{{ else }}+{{ end }}</div>
+                <div>
+                  <div class="desc">{{.Title}}</div>
+                  <div class="meta">{{.Date}} • {{.Category}}</div>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-weight:700">{{printf "%.2f" .Amount}}</div>
+                <div class="meta">Saldo: {{printf "%.2f" .PostBalance}}</div>
+              </div>
+            </div>
+          {{- end }}
+        {{- else }}
+          <div class="tx"><div class="left"><div class="desc">Nenhuma transação recente</div></div></div>
+        {{- end }}
+      </div>
+
+      <footer>Proteja seus dados — nunca compartilhe sua senha.</footer>
+    </section>
+  </div>
+
+  <script>
+    // Formata moedas (pt-BR). Os valores já chegam como números do back-end,
+    // mas para segurança e apresentação, formatamos aqui.
+    (function(){
+      function formatBR(value){
+        try{
+          const v = Number(value);
+          return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);
+        }catch(e){return value}
+      }
+
+      // formata o saldo principal
+      const balEl = document.getElementById('balance');
+      if(balEl){
+        const raw = balEl.textContent.replace(/[^0-9\-,.]/g,'').replace(',','.');
+        balEl.textContent = formatBR(raw);
+      }
+
+      // data de atualização
+      const upd = document.getElementById('updatedAt');
+      if(upd && upd.textContent.trim() === ''){
+        upd.textContent = new Date().toLocaleString('pt-BR');
+      }
+    })();
+  </script>
+</body>
+</html>
